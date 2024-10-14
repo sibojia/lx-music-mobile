@@ -103,7 +103,7 @@ public class LyricBluetoothSender {
 
   public void release() {
     if(mediaSession != null) {
-      mediaSession.setActive(false);
+      if (mediaSession.isActive()) mediaSession.setActive(false);
       Log.i("Lyric", "release mediaSession");
     }
   }
