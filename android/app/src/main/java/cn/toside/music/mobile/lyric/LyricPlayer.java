@@ -84,7 +84,7 @@ public class LyricPlayer {
     return (int)(System.nanoTime() / 1000000);
   }
 
-  private int getCurrentTime() {
+  public int getCurrentTime() {
     return (int)((getNow() - this.performanceTime) * this.playbackRate) + startPlayTime;
   }
 

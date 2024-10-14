@@ -45,13 +45,16 @@ export const showDesktopLyric = async() => {
     textPositionY: setting['desktopLyric.textPosition.y'],
   })
   let lrc = playerState.musicInfo.lrc ?? ''
+  let title = playerState.musicInfo.name ?? ''
+  let singer = playerState.musicInfo.singer ?? ''
+  let album = playerState.musicInfo.album ?? ''
   let tlrc = playerState.musicInfo.tlrc ?? ''
   let rlrc = playerState.musicInfo.rlrc ?? ''
   if (setting['player.isS2t']) {
     lrc = tranditionalize(lrc)
     tlrc = tranditionalize(tlrc)
   }
-  await setLyric(lrc, tlrc, rlrc)
+  await setLyric(lrc, tlrc, rlrc, title, singer, album)
   if (playerState.isPlay && !global.lx.gettingUrlId) {
     void getPosition().then(position => {
       void play(position * 1000)
