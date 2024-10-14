@@ -18,11 +18,9 @@ import java.util.Objects;
 public class Lyric extends LyricPlayer {
   LyricView lyricView = null;
   LyricEvent lyricEvent = null;
-  LyricBluetoothSender lyricBluetoothSender = null;
   ReactApplicationContext reactAppContext;
 
   boolean isShowLyric = false;
-  boolean isSendBluetoothLyric = true;
   // String lastText = "LX Music ^-^";
   int lastLine = 0;
   List lines = new ArrayList();
@@ -31,16 +29,12 @@ public class Lyric extends LyricPlayer {
   String lyricText = "";
   String translationText = "";
   String romaLyricText = "";
-  String titleText = "";
-  String singerText = "";
-  String albumText = "";
 
   Lyric(ReactApplicationContext reactContext, boolean isShowTranslation, boolean isShowRoma, float playbackRate) {
     this.reactAppContext = reactContext;
     this.isShowTranslation = isShowTranslation;
     this.isShowRoma = isShowRoma;
     this.playbackRate = playbackRate;
-    this.lyricBluetoothSender = new LyricBluetoothSender(reactContext);
     registerScreenBroadcastReceiver();
   }
 
@@ -105,17 +99,6 @@ public class Lyric extends LyricPlayer {
     lyricView.setLyric("", new ArrayList<>(0));
   }
 
-  private void setLyricToSendBluetooth(int lineNum) {
-    if (!isSendBluetoothLyric || lyricBluetoothSender == null) return;
-    if (lineNum >= 0 && lineNum < lines.size()) {
-      HashMap line = (HashMap) lines.get(lineNum);
-      if (line != null) {
-        String fakeSingerLine = titleText + "-" + singerText;
-        lyricBluetoothSender.sendLyricLine((String) line.get("text"), fakeSingerLine, albumText, getCurrentTime());
-      }
-    }
-  }
-
   public void showLyric(Bundle options, Promise promise) {
     if (lyricEvent == null) lyricEvent = new LyricEvent(reactAppContext);
     if (lyricView == null) lyricView = new LyricView(reactAppContext, lyricEvent);
@@ -146,13 +129,10 @@ public class Lyric extends LyricPlayer {
     if (lyricView != null) super.setLyric(lyricText, extendedLyrics);
   }
 
-  public void setLyric(String lyric, String translation, String romaLyric, String title, String singer, String album) {
+  public void setLyric(String lyric, String translation, String romaLyric) {
     lyricText = lyric;
     translationText = translation;
     romaLyricText = romaLyric;
-    titleText = title;
-    singerText = singer;
-    albumText = album;
     refreshLyric();
   }
 
@@ -169,13 +149,11 @@ public class Lyric extends LyricPlayer {
   @Override
   public void onPlay(int lineNum) {
     setViewLyric(lineNum);
-    setLyricToSendBluetooth(lineNum);
     // Log.d("Lyric", lineNum + " " + text + " " + (String) line.get("translation"));
   }
 
   public void pauseLyric() {
     pause();
-    lyricBluetoothSender.release();
     if (!isShowLyric) return;
     if (lyricView != null) lyricView.setLyric("", new ArrayList<>(0));
   }
@@ -230,9 +208,5 @@ public class Lyric extends LyricPlayer {
 
   public void setLyricTextPosition(String positionX, String positionY) {
     lyricView.setLyricTextPosition(positionX, positionY);
-  }
-
-  public void toggleSendBluetoothLyric(boolean isSendBluetoothLyric) {
-    this.isSendBluetoothLyric = isSendBluetoothLyric;
   }
 }
