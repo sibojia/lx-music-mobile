@@ -79,10 +79,10 @@ public class LyricModule extends ReactContextBaseJavaModule {
 
 
   @ReactMethod
-  public void setLyric(String lyric, String translation, String romaLyric, Promise promise) {
+  public void setLyric(String lyric, String translation, String romaLyric, String title, String singer, String album, Promise promise) {
     // Log.d("Lyric", "set lyric: " + lyric);
     // Log.d("Lyric", "set lyric translation: " + translation);
-    if (lyric != null) this.lyric.setLyric(lyric, translation, romaLyric);
+    if (lyric != null) this.lyric.setLyric(lyric, translation, romaLyric, title, singer, album);
     promise.resolve(null);
   }
 
@@ -196,6 +196,11 @@ public class LyricModule extends ReactContextBaseJavaModule {
       reactContext.startActivityForResult(intent, 1, null);
     }
     promise.resolve(null);
+  }
+
+  @ReactMethod
+  public void toggleSendBluetoothLyric(boolean isSendBluetoothLyric) {
+    if (lyric != null) lyric.toggleSendBluetoothLyric(isSendBluetoothLyric);
   }
 
 }

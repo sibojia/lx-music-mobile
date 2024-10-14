@@ -107,7 +107,7 @@ export const hideLyric = async(): Promise<void> => {
  * @returns {Promise} Promise
  */
 export const play = async(time: number): Promise<void> => {
-  if (!isShowLyric) return Promise.resolve()
+  // if (!isShowLyric) return Promise.resolve()
   return LyricModule.play(time)
 }
 
@@ -115,7 +115,7 @@ export const play = async(time: number): Promise<void> => {
  * pause lyric
  */
 export const pause = async(): Promise<void> => {
-  if (!isShowLyric) return Promise.resolve()
+  // if (!isShowLyric) return Promise.resolve()
   return LyricModule.pause()
 }
 
@@ -125,9 +125,9 @@ export const pause = async(): Promise<void> => {
  * @param translation lyric translation
  * @param romalrc lyric translation
  */
-export const setLyric = async(lyric: string, translation: string, romalrc: string): Promise<void> => {
-  if (!isShowLyric) return Promise.resolve()
-  return LyricModule.setLyric(lyric, translation || '', romalrc || '')
+export const setLyric = async(lyric: string, translation: string, romalrc: string, title: string, singer: string, album: string): Promise<void> => {
+  // if (!isShowLyric) return Promise.resolve()
+  return LyricModule.setLyric(lyric, translation || '', romalrc || '', title || '', singer || '', album || '')
 }
 
 export const setPlaybackRate = async(rate: number): Promise<void> => {
