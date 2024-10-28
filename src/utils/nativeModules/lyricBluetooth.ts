@@ -1,4 +1,4 @@
-import { NativeModules } from 'react-native'
+import { NativeModules, NativeEventEmitter } from 'react-native'
 
 const { BluetoothLyricModule } = NativeModules
 
@@ -41,3 +41,14 @@ export const toggleSendBluetoothLyric = async(enable: boolean): Promise<void> =>
   return BluetoothLyricModule.toggleSendBluetoothLyric(enable)
 }
 
+export const onSetBluetoothLyric = (handler: (lyric: { title: string, singer: string, album: string }) => void): () => void => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  const eventEmitter = new NativeEventEmitter(BluetoothLyricModule)
+  const eventListener = eventEmitter.addListener('set-bluetooth-lyric', event => {
+    handler(event as { title: string, singer: string, album: string })
+  })
+
+  return () => {
+    eventListener.remove()
+  }
+}

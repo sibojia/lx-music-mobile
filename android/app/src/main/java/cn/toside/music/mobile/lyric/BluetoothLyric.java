@@ -1,5 +1,7 @@
 package cn.toside.music.mobile.lyric;
 
+import static java.lang.Integer.min;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -7,8 +9,10 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.WritableMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +21,7 @@ import java.util.Objects;
 
 public class BluetoothLyric extends LyricPlayer {
   LyricBluetoothSender lyricBluetoothSender = null;
+  LyricEvent lyricEvent = null;
   ReactApplicationContext reactAppContext;
 
   boolean isSendBluetoothLyric = true;
@@ -31,6 +36,7 @@ public class BluetoothLyric extends LyricPlayer {
     this.reactAppContext = reactContext;
     this.playbackRate = playbackRate;
     this.lyricBluetoothSender = new LyricBluetoothSender(reactContext);
+    this.lyricEvent = new LyricEvent(reactContext);
   }
 
 
@@ -40,8 +46,17 @@ public class BluetoothLyric extends LyricPlayer {
       HashMap line = (HashMap) lines.get(lineNum);
       if (line != null) {
         String fakeSingerLine = titleText + "-" + singerText;
-        lyricBluetoothSender.sendLyricLine((String) line.get("text"), fakeSingerLine, albumText, getCurrentTime());
-        Log.d("Lyric", "send by lyric " + line.get("text"));
+        String lyricLine = (String) line.get("text");
+        String lyricShow = lyricLine.substring(0, min(lyricLine.length(), 30));
+        String artistShow = fakeSingerLine.substring(0, min(fakeSingerLine.length(), 30));
+        String albumShow = albumText.substring(0, min(albumText.length(), 30));
+//        lyricBluetoothSender.sendLyricLine(lyricShow, artistShow, albumShow, getCurrentTime());
+        WritableMap params = Arguments.createMap();
+        params.putString("title", lyricShow);
+        params.putString("singer", artistShow);
+        params.putString("album", albumShow);
+        lyricEvent.sendEvent(lyricEvent.SET_BLUETOOTH_LYRIC, params);
+        Log.d("Lyric", "send react-bt lyric " + line.get("text"));
       }
     }
   }

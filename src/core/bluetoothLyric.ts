@@ -4,6 +4,7 @@ import {
   pause,
   setPlaybackRate,
   toggleSendBluetoothLyric,
+  onSetBluetoothLyric,
 } from '@/utils/nativeModules/lyricBluetooth'
 import settingState from '@/store/setting/state'
 import playerState from '@/store/player/state'
@@ -18,4 +19,5 @@ export const playBluetoothLyric = async(time: number) => {
 export const pauseBluetoothLyric = pause
 export const setBluetoothLyric = setLyric
 export const setBluetoothLyricPlaybackRate = setPlaybackRate
+export const OnSetBluetoothLyric = onSetBluetoothLyric
 
