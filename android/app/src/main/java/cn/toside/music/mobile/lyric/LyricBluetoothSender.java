@@ -3,6 +3,7 @@ package cn.toside.music.mobile.lyric;
 import static java.lang.Integer.min;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
@@ -23,6 +24,7 @@ public class LyricBluetoothSender {
   AudioManager audioManager = null;
   MediaSessionCompat mediaSessionCompat = null;
   private static final boolean useCompat = true;
+  private static final boolean useIntent = false;
 
   public LyricBluetoothSender(ReactApplicationContext reactContext) {
     this.reactAppContext = reactContext;
@@ -30,6 +32,9 @@ public class LyricBluetoothSender {
   }
 
   private void initMediasession() {
+    if (useIntent)
+      return;
+
     if (useCompat) {
       if (mediaSessionCompat == null) {
         mediaSessionCompat = new MediaSessionCompat(reactAppContext.getApplicationContext(), "BluetoothlyricCompat");
@@ -106,6 +111,18 @@ public class LyricBluetoothSender {
   public void sendLyricLine(String lyricShow, String artistShow, String albumShow, long currentTime) {
     // Reference: https://gist.github.com/davidalbers/953eb949314fd6607616
     if(audioManager.isBluetoothA2dpOn()) {
+      if (useIntent) {
+        // Reference: https://www.cnblogs.com/fuyaozhishang/p/7639675.html
+        Intent mediaIntent =new Intent("com.android.music.metachanged");
+        mediaIntent.putExtra("artist", artistShow);
+        mediaIntent.putExtra("track", lyricShow);
+        mediaIntent.putExtra("album", albumShow);
+        mediaIntent.putExtra("playing", true);
+        this.reactAppContext.sendBroadcast(mediaIntent);
+        Log.d("Lyric", "Sent Intent with lyric " + lyricShow + "/" + artistShow + "/" + albumShow);
+        return;
+      }
+
       initMediasession();
 
       if(useCompat) {
@@ -113,18 +130,20 @@ public class LyricBluetoothSender {
           .putString(MediaMetadata.METADATA_KEY_TITLE, lyricShow)
           .putString(MediaMetadata.METADATA_KEY_ARTIST, artistShow)
           .putString(MediaMetadata.METADATA_KEY_ALBUM, albumShow)
+//          .putString(MediaMetadata.ME)
           .build();
         PlaybackStateCompat stateCompat = new PlaybackStateCompat.Builder()
           .setActions(PlaybackStateCompat.ACTION_PAUSE | PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PLAY_PAUSE |
             PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID | PlaybackStateCompat.ACTION_STOP |
-            PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
-          .setState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT, currentTime, 1.0f, SystemClock.elapsedRealtime())
+            PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS | PlaybackStateCompat.ACTION_SEEK_TO)
+          .setState(PlaybackStateCompat.STATE_REWINDING, currentTime, 1.0f, SystemClock.elapsedRealtime())
           .build();
         if (!mediaSessionCompat.isActive()) {
           mediaSessionCompat.setActive(true);
         }
-//        mediaSessionCompat.setPlaybackState(stateCompat);
+        mediaSessionCompat.setPlaybackState(stateCompat);
         mediaSessionCompat.setMetadata(metadataCompat);
+        Log.d("Lyric", "updateMediaSessioCompat with lyric " + lyricShow + "/" + artistShow + "/" + albumShow);
       }
       else {
         MediaMetadata metadata = new MediaMetadata.Builder()
@@ -153,13 +172,15 @@ public class LyricBluetoothSender {
           .build();
         mediaSession.setPlaybackState(state);
         mediaSession.setMetadata(metadata);
+        Log.d("Lyric", "updateMediaSession with lyric " + lyricShow + "/" + artistShow + "/" + albumShow);
       }
-//      Log.i("Lyric", "updateMediaSession with lyric " + lyricShow + "/" + artistShow + "/" + albumShow);
       Toast.makeText(this.reactAppContext.getApplicationContext(), lyricShow, Toast.LENGTH_SHORT).show();
     }
   }
 
   public void release() {
+    if (useIntent)
+      return;
     if(useCompat) {
       if(mediaSessionCompat != null) {
         if(mediaSessionCompat.isActive()) mediaSessionCompat.setActive(false);

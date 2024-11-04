@@ -56,7 +56,7 @@ public class BluetoothLyric extends LyricPlayer {
         params.putString("singer", artistShow);
         params.putString("album", albumShow);
         lyricEvent.sendEvent(lyricEvent.SET_BLUETOOTH_LYRIC, params);
-        Log.d("Lyric", "send react-bt lyric " + line.get("text"));
+        Log.d("Lyric", "send react-bt lyric " + lyricShow);
       }
     }
   }
